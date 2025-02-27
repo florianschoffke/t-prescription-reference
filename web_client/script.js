@@ -6,7 +6,7 @@ function obtainAccessToken() {
     const clientId = 'client_id_1';  // Replace with your actual client ID
     const clientSecret = 'client_secret_1';  // Replace with your actual client secret
 
-    fetch('http://127.0.0.1:5001/token', {
+    fetch('http://127.0.0.1:3001/token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -25,7 +25,25 @@ function obtainAccessToken() {
 
 document.getElementById('fetchByDate').addEventListener('click', fetchPrescriptionsByDate);
 document.getElementById('fetchOffLabel').addEventListener('click', fetchOffLabelPrescriptions);
-document.getElementById('postPrescription').addEventListener('click', postPrescriptionData);
+document.getElementById('fetchAll').addEventListener('click', fetchAllPrescriptions);
+document.getElementById('prescriptionForm').addEventListener('submit', postPrescriptionData);
+
+// Fetch all prescriptions
+function fetchAllPrescriptions() {
+    fetch('http://127.0.0.1:3000/t-prescription-all', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`  // Use the stored access token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        populateTable(data);
+    })
+    .catch(error => {
+        console.error('Error fetching all prescriptions:', error);
+    });
+}
 
 // Fetch prescriptions by dispense date
 function fetchPrescriptionsByDate() {
@@ -35,7 +53,7 @@ function fetchPrescriptionsByDate() {
         return;
     }
 
-    fetch(`http://127.0.0.1:5000/t-prescription-by-date?dispense_date=${dispenseDate}`, {
+    fetch(`http://127.0.0.1:3000/t-prescription-by-date?dispense_date=${dispenseDate}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${accessToken}`  // Use the stored access token
@@ -52,7 +70,7 @@ function fetchPrescriptionsByDate() {
 
 // Fetch all prescriptions with off-label use
 function fetchOffLabelPrescriptions() {
-    fetch('http://127.0.0.1:5000/t-prescription-off-label-use', {
+    fetch('http://127.0.0.1:3000/t-prescription-off-label-use', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${accessToken}`  // Use the stored access token
@@ -68,16 +86,18 @@ function fetchOffLabelPrescriptions() {
 }
 
 // Post prescription data
-function postPrescriptionData() {
+function postPrescriptionData(event) {
+    event.preventDefault();  // Prevent form submission
+
     const prescriptionId = document.getElementById('prescriptionId').value;
     const patientName = document.getElementById('patientName').value;
     const medication = document.getElementById('medication').value;
     const dispenseDate = document.getElementById('dispenseDatePost').value;
-    const offLabelUse = document.getElementById('offLabelUse').value.toLowerCase() === 'true';
+    const offLabelUse = document.getElementById('offLabelUse').value;
 
     const csvData = `${prescriptionId},${patientName},${medication},${dispenseDate},${offLabelUse}`;
 
-    fetch('http://127.0.0.1:5000/t-prescription-carbon-copy', {
+    fetch('http://127.0.0.1:3000/t-prescription-carbon-copy', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${accessToken}`,  // Use the stored access token
