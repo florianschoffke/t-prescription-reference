@@ -3,7 +3,6 @@ from authlib.integrations.flask_oauth2 import ResourceProtector
 import sqlite3
 import csv
 import io
-import requests
 
 app = Flask(__name__)
 
@@ -13,7 +12,7 @@ require_oauth = ResourceProtector()
 # Function to insert prescription data into the SQLite database
 def insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use):
     # Connect to the SQLite database
-    conn = sqlite3.connect('prescriptions.db')
+    conn = sqlite3.connect('../t-database.db')  # Updated database path
     cursor = conn.cursor()
     
     # Insert the prescription data into the database
@@ -28,7 +27,7 @@ def insert_prescription(prescription_id, patient_name, medication, dispense_date
 
 # Function to retrieve prescriptions by dispense date
 def get_prescription_by_date(dispense_date):
-    conn = sqlite3.connect('prescriptions.db')
+    conn = sqlite3.connect('../t-database.db')
     cursor = conn.cursor()
     
     # Query to select prescriptions with the specified dispense date
@@ -43,7 +42,7 @@ def get_prescription_by_date(dispense_date):
 
 # Function to retrieve all prescriptions with off-label use
 def get_prescriptions_off_label_use():
-    conn = sqlite3.connect('prescriptions.db')
+    conn = sqlite3.connect('../t-database.db')
     cursor = conn.cursor()
     
     # Query to select prescriptions where off_label_use is true

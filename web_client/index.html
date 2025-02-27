@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription Data</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Prescription Data</h1>
+    
+    <div>
+        <label for="dispenseDate">Select Dispense Date:</label>
+        <input type="date" id="dispenseDate">
+        <button id="fetchByDate">Fetch Prescriptions</button>
+        <button id="fetchOffLabel">Fetch Off-Label Use Prescriptions</button>
+    </div>
+
+    <div>
+        <h2>Post Prescription Data</h2>
+        <input type="text" id="prescriptionId" placeholder="Prescription ID">
+        <input type="text" id="patientName" placeholder="Patient Name">
+        <input type="text" id="medication" placeholder="Medication">
+        <input type="date" id="dispenseDatePost">
+        <input type="text" id="offLabelUse" placeholder="Off Label Use (true/false)">
+        <button id="postPrescription">Post Prescription</button>
+    </div>
+    
+    <table id="prescriptionTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Prescription ID</th>
+                <th onclick="sortTable(1)">Patient Name</th>
+                <th onclick="sortTable(2)">Medication</th>
+                <th onclick="sortTable(3)">Dispense Date</th>
+                <th onclick="sortTable(4)">Off Label Use</th>
+            </tr>
+        </thead>
+        <tbody id="prescriptionBody">
+            <!-- Prescription data will be populated here -->
+        </tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
