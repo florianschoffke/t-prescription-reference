@@ -7,8 +7,10 @@ import requests
 import logging
 
 app = Flask(__name__)
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type, Authorization'
+CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}}, 
+     methods=["GET", "POST", "OPTIONS", 'OPTIONS'],
+     allow_headers=["Authorization", "Content-Type"])
+
 
 # In-memory storage to simulate token validation
 # This should be synchronized with the OAuth server's in-memory storage
@@ -18,8 +20,10 @@ access_tokens = {
 
 # Function to validate the access token
 def validate_token(token):
-    # validating the token in oauth server
-    return True
+    introspection_url = "http://localhost:3001/introspect"
+    response = requests.post(introspection_url, data={'token': token})
+    token_info = response.json()
+    return token_info.get('active', False)
 
 
 # Configure logging
@@ -29,7 +33,7 @@ logger = logging.getLogger(__name__)
 # Function to insert prescription data into the SQLite database
 def insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use):
     try:
-        conn = sqlite3.connect('../t-database.db')  # Updated database path
+        conn = sqlite3.connect('./t-database.db')  # Updated database path
         cursor = conn.cursor()
         
         # Log the data being inserted
@@ -77,8 +81,7 @@ def check_token():
     
 
 # Endpoint to receive prescription data
-@app.route('/t-prescription-carbon-copy', methods=['POST'])
-@cross_origin()
+@app.route('/t-prescription-carbon-copy', methods=['POST', 'OPTIONS'])
 def receive_prescription():
     print("Hello World")
     csv_line = request.data.decode('utf-8')
@@ -94,8 +97,7 @@ def receive_prescription():
     return jsonify({"message": "Prescription data received and stored successfully."}), 201
 
 # Endpoint to retrieve all prescriptions
-@app.route('/t-prescription-all', methods=['GET'])
-@cross_origin()
+@app.route('/t-prescription-all', methods=['GET', 'OPTIONS'])
 def get_all_prescriptions_route():
     prescriptions = get_all_prescriptions()
     
@@ -115,8 +117,7 @@ def get_all_prescriptions_route():
         return jsonify({"message": "No prescriptions found."}), 404
 
 # Endpoint to retrieve prescriptions by dispense date
-@app.route('/t-prescription-by-date', methods=['GET'])
-@cross_origin()
+@app.route('/t-prescription-by-date', methods=['GET', 'OPTIONS'])
 def get_prescription_by_date_route():
     dispense_date = request.args.get('dispense_date')
     if not dispense_date:
@@ -140,8 +141,7 @@ def get_prescription_by_date_route():
         return jsonify({"message": "No prescriptions found for the given dispense date."}), 404
 
 # Endpoint to retrieve all prescriptions with off-label use
-@app.route('/t-prescription-off-label-use', methods=['GET'])
-@cross_origin()
+@app.route('/t-prescription-off-label-use', methods=['GET', 'OPTIONS'])
 def get_prescription_off_label_use_route():
     prescriptions = get_prescriptions_off_label_use()
     

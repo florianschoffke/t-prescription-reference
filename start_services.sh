@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Start E-Rezept-Fachdienst 
+echo "Starting E-Rezept-Fachdienst..."
+python3 webserver/erp-fd.py &
+
 # Start the OAuth server
 echo "Starting OAuth server..."
 python3 webserver/t-oauth.py &

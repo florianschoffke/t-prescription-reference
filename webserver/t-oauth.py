@@ -3,18 +3,19 @@ import uuid
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type, Authorization'
+CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}}, 
+     methods=["GET", "POST", "OPTIONS"],
+     allow_headers=["Authorization", "Content-Type"])
 
 # In-memory storage for client credentials and tokens
 clients = {
-    'client_id_1': 'client_secret_1'
+    'client_id_1': 'client_secret_1',
+    'client_id_2': 'client_secret_2'
 }
 
 access_tokens = {}
 
 @app.route('/token', methods=['POST', 'OPTIONS'])
-@cross_origin()
 def token():
     client_id = request.form.get('client_id')
     client_secret = request.form.get('client_secret')
@@ -34,7 +35,6 @@ def token():
     return jsonify({'access_token': access_token, 'token_type': 'bearer'})
 
 @app.route('/resource', methods=['GET', 'OPTIONS'])
-@cross_origin()
 def resource():
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
@@ -47,7 +47,6 @@ def resource():
     return jsonify({'data': 'This is protected data.'})
 
 @app.route('/introspect', methods=['POST', 'OPTIONS'])
-@cross_origin()
 def introspect():
     print(request)
     token = request.form.get('token')

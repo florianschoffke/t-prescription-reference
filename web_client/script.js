@@ -3,8 +3,9 @@ let accessToken = '';  // Variable to store the access token
 
 // Function to obtain the access token
 function obtainAccessToken() {
-    const clientId = 'client_id_1';  // Ensure this matches your OAuth server
-    const clientSecret = 'client_secret_1';  // Ensure this matches your OAuth server
+    console.log("Attempting to obtain access token...");
+    const clientId = 'client_id_2';
+    const clientSecret = 'client_secret_2';
 
     fetch('http://127.0.0.1:3001/token', {
         method: 'POST',
@@ -14,7 +15,7 @@ function obtainAccessToken() {
         body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
     })
     .then(response => {
-        console.log('Response:', response);
+        console.log('Token Response:', response);
         if (!response.ok) {
             throw new Error('Failed to obtain access token');
         }
@@ -22,7 +23,7 @@ function obtainAccessToken() {
     })
     .then(data => {
         if (data.access_token) {
-            accessToken = data.access_token;  // Store the access token
+            accessToken = data.access_token;
             console.log('Access Token:', accessToken);
         } else {
             throw new Error('Access token not found in response');
@@ -35,10 +36,10 @@ function obtainAccessToken() {
 }
 
 
+
 document.getElementById('fetchByDate').addEventListener('click', fetchPrescriptionsByDate);
 document.getElementById('fetchOffLabel').addEventListener('click', fetchOffLabelPrescriptions);
 document.getElementById('fetchAll').addEventListener('click', fetchAllPrescriptions);
-document.getElementById('prescriptionForm').addEventListener('submit', postPrescriptionData);
 
 // Fetch all prescriptions
 function fetchAllPrescriptions() {
@@ -100,36 +101,6 @@ function fetchOffLabelPrescriptions() {
     })
     .catch(error => {
         console.error('Error fetching off-label prescriptions:', error);
-    });
-}
-
-// Post prescription data
-function postPrescriptionData(event) {
-    event.preventDefault();  // Prevent form submission
-
-    const prescriptionId = document.getElementById('prescriptionId').value;
-    const patientName = document.getElementById('patientName').value;
-    const medication = document.getElementById('medication').value;
-    const dispenseDate = document.getElementById('dispenseDatePost').value;
-    const offLabelUse = document.getElementById('offLabelUse').value;
-
-    const csvData = `${prescriptionId},${patientName},${medication},${dispenseDate},${offLabelUse}`;
-
-    fetch('http://127.0.0.1:3000/t-prescription-carbon-copy', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${accessToken}`,  // Use the stored access token
-            'Content-Type': 'text/csv'
-        },
-        body: csvData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Post Response:', data);
-        alert('Prescription data posted successfully!');
-    })
-    .catch(error => {
-        console.error('Error posting prescription data:', error);
     });
 }
 

@@ -7,6 +7,9 @@ kill_process_by_name() {
     pkill -f $process_name
 }
 
+# Kill the E-Rezept-Fachdienst 
+kill_process_by_name "erp-fd.py"
+
 # Kill the OAuth server
 kill_process_by_name "t-oauth.py"
 
