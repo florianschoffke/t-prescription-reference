@@ -43,5 +43,20 @@ def resource():
 
     return jsonify({'data': 'This is protected data.'})
 
+@app.route('/introspect', methods=['POST'])
+def introspect():
+    token = request.form.get('token')
+    if not token:
+        return jsonify({'error': 'token_missing'}), 400
+
+    # Check if the token is valid
+    if token in access_tokens:
+        return jsonify({
+            'active': True,
+            'client_id': access_tokens[token]
+        }), 200
+    else:
+        return jsonify({'active': False}), 200
+
 if __name__ == '__main__':
     app.run(port=3001, debug=True)

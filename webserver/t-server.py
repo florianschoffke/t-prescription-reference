@@ -16,9 +16,14 @@ access_tokens = {
 }
 
 # Function to validate the access token
+
 def validate_token(token):
-    # Check if the token is in the in-memory store
-    return token in access_tokens
+    introspection_url = "http://127.0.0.1:3001/introspect"
+    response = requests.post(introspection_url, data={'token': token})
+    print(response)
+    token_info = response.json()
+    
+    return token_info.get('active', False)
 
 
 # Configure logging
@@ -68,6 +73,8 @@ def check_token():
         return jsonify({"error": "Authorization header missing"}), 401
 
     token = auth_header.split(" ")[1]  # Extract the token from the header
+    print("XXX")
+    print(validate_token(token))
     if not validate_token(token):
         return jsonify({"error": "Invalid or expired token"}), 401
 
