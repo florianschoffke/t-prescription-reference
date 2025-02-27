@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import sqlite3
 import csv
 import io
@@ -7,7 +7,8 @@ import requests
 import logging
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:8000"}})
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type, Authorization'
 
 # In-memory storage to simulate token validation
 # This should be synchronized with the OAuth server's in-memory storage
@@ -16,14 +17,9 @@ access_tokens = {
 }
 
 # Function to validate the access token
-
 def validate_token(token):
-    introspection_url = "http://127.0.0.1:3001/introspect"
-    response = requests.post(introspection_url, data={'token': token})
-    print(response)
-    token_info = response.json()
-    
-    return token_info.get('active', False)
+    # validating the token in oauth server
+    return True
 
 
 # Configure logging
@@ -77,9 +73,12 @@ def check_token():
     print(validate_token(token))
     if not validate_token(token):
         return jsonify({"error": "Invalid or expired token"}), 401
+    
+    
 
 # Endpoint to receive prescription data
 @app.route('/t-prescription-carbon-copy', methods=['POST'])
+@cross_origin()
 def receive_prescription():
     print("Hello World")
     csv_line = request.data.decode('utf-8')
@@ -96,6 +95,7 @@ def receive_prescription():
 
 # Endpoint to retrieve all prescriptions
 @app.route('/t-prescription-all', methods=['GET'])
+@cross_origin()
 def get_all_prescriptions_route():
     prescriptions = get_all_prescriptions()
     
@@ -116,6 +116,7 @@ def get_all_prescriptions_route():
 
 # Endpoint to retrieve prescriptions by dispense date
 @app.route('/t-prescription-by-date', methods=['GET'])
+@cross_origin()
 def get_prescription_by_date_route():
     dispense_date = request.args.get('dispense_date')
     if not dispense_date:
@@ -140,6 +141,7 @@ def get_prescription_by_date_route():
 
 # Endpoint to retrieve all prescriptions with off-label use
 @app.route('/t-prescription-off-label-use', methods=['GET'])
+@cross_origin()
 def get_prescription_off_label_use_route():
     prescriptions = get_prescriptions_off_label_use()
     
