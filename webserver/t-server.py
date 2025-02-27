@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import sqlite3
 import csv
 import io
@@ -6,19 +7,23 @@ import requests
 import logging
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:8000"}})
+
+# In-memory storage to simulate token validation
+# This should be synchronized with the OAuth server's in-memory storage
+access_tokens = {
+    # Example token: 'example_token': 'client_id_123'
+}
+
+# Function to validate the access token
+def validate_token(token):
+    # Check if the token is in the in-memory store
+    return token in access_tokens
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-# Function to validate the access token with the OAuth server
-def validate_token(token):
-    introspection_url = 'http://127.0.0.1:3001/introspect'  # Example introspection endpoint
-    response = requests.post(introspection_url, data={'token': token})
-    if response.status_code == 200:
-        token_info = response.json()
-        return token_info.get('active', False)  # Check if the token is active
-    return False
 
 # Function to insert prescription data into the SQLite database
 def insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use):
@@ -44,7 +49,7 @@ def insert_prescription(prescription_id, patient_name, medication, dispense_date
 
 # Function to retrieve all prescriptions
 def get_all_prescriptions():
-    conn = sqlite3.connect('../t-database.db')
+    conn = sqlite3.connect('./t-database.db')
     cursor = conn.cursor()
     
     cursor.execute('SELECT * FROM prescriptions')
@@ -56,7 +61,9 @@ def get_all_prescriptions():
 # Middleware to check token validity
 @app.before_request
 def check_token():
+    print(request.headers)
     auth_header = request.headers.get('Authorization')
+    print(auth_header)
     if not auth_header:
         return jsonify({"error": "Authorization header missing"}), 401
 
@@ -67,6 +74,7 @@ def check_token():
 # Endpoint to receive prescription data
 @app.route('/t-prescription-carbon-copy', methods=['POST'])
 def receive_prescription():
+    print("Hello World")
     csv_line = request.data.decode('utf-8')
     csv_reader = csv.reader(io.StringIO(csv_line))
     for row in csv_reader:

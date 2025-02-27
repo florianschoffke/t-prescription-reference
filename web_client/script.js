@@ -3,8 +3,8 @@ let accessToken = '';  // Variable to store the access token
 
 // Function to obtain the access token
 function obtainAccessToken() {
-    const clientId = 'client_id_1';  // Replace with your actual client ID
-    const clientSecret = 'client_secret_1';  // Replace with your actual client secret
+    const clientId = 'client_id_1';  // Ensure this matches your OAuth server
+    const clientSecret = 'client_secret_1';  // Ensure this matches your OAuth server
 
     fetch('http://127.0.0.1:3001/token', {
         method: 'POST',
@@ -13,15 +13,27 @@ function obtainAccessToken() {
         },
         body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response:', response);
+        if (!response.ok) {
+            throw new Error('Failed to obtain access token');
+        }
+        return response.json();
+    })
     .then(data => {
-        accessToken = data.access_token;  // Store the access token
-        console.log('Access Token:', accessToken);
+        if (data.access_token) {
+            accessToken = data.access_token;  // Store the access token
+            console.log('Access Token:', accessToken);
+        } else {
+            throw new Error('Access token not found in response');
+        }
     })
     .catch(error => {
         console.error('Error obtaining access token:', error);
+        alert('Failed to obtain access token. Please check the console for more details.');
     });
 }
+
 
 document.getElementById('fetchByDate').addEventListener('click', fetchPrescriptionsByDate);
 document.getElementById('fetchOffLabel').addEventListener('click', fetchOffLabelPrescriptions);
@@ -30,14 +42,20 @@ document.getElementById('prescriptionForm').addEventListener('submit', postPresc
 
 // Fetch all prescriptions
 function fetchAllPrescriptions() {
+    console.log('Fetching all prescriptions');
+    console.log(accessToken);
     fetch('http://127.0.0.1:3000/t-prescription-all', {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${accessToken}`  // Use the stored access token
+            Authorization: `Bearer ${accessToken}`  // Use the stored access token
         }
     })
-    .then(response => response.json())
+    .then(response =>{
+        console.log(response)
+        return response.json()
+    })
     .then(data => {
+        console.log(data)
         populateTable(data);
     })
     .catch(error => {
