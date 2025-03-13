@@ -6,7 +6,7 @@ import os
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-DB_PATH = '../t-database.db'  # Define the database path
+DB_PATH = './t-database.db'  # Define the database path
 
 def create_database():
     conn = sqlite3.connect(DB_PATH)

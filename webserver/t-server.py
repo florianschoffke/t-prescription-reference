@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import t_database
-import sqlite3
 import csv
 import io
 import requests
@@ -52,7 +51,20 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-# Function to interact with database
+# Function to generate prescription list
+def get_prescription_list(prescriptions):
+    return [
+        {
+            "prescription_id": prescription[1],
+            "patient_name": prescription[2],
+            "medication": prescription[3],
+            "dispense_date": prescription[4],
+            "off_label_use": prescription[5],
+            "pharmacy": prescription[6],
+            "doctor": prescription[7]
+        }
+        for prescription in prescriptions
+    ]
 
 
 # Endpoint to receive prescription data
@@ -77,22 +89,8 @@ def receive_prescription():
 def get_all_prescriptions_route():
     prescriptions = t_database.get_all_prescriptions()
     
-    print(prescriptions)
-    
     if prescriptions:
-        prescriptions_list = [
-            {
-                "prescription_id": prescription[1],
-                "patient_name": prescription[2],
-                "medication": prescription[3],
-                "dispense_date": prescription[4],
-                "off_label_use": prescription[5],
-                "pharmacy": prescription[6],
-                "doctor": prescription[7]
-            }
-            for prescription in prescriptions
-        ]
-        return jsonify(prescriptions_list), 200
+        return jsonify(get_prescription_list(prescriptions)), 200
     elif len(prescriptions) == 0:
         return jsonify({"message": "No prescriptions found"}), 200
     else:
@@ -108,17 +106,7 @@ def get_prescription_by_date_route():
     prescriptions = t_database.get_prescription_by_date(dispense_date)
     
     if prescriptions:
-        prescriptions_list = [
-            {
-                "prescription_id": prescription[1],
-                "patient_name": prescription[2],
-                "medication": prescription[3],
-                "dispense_date": prescription[4],
-                "off_label_use": prescription[5]
-            }
-            for prescription in prescriptions
-        ]
-        return jsonify(prescriptions_list), 200
+        return jsonify(get_prescription_list(prescriptions)), 200
     else:
         return jsonify({"message": "No prescriptions found for the given dispense date."}), 404
 
@@ -128,17 +116,7 @@ def get_prescription_off_label_use_route():
     prescriptions = t_database.get_prescriptions_off_label_use()
     
     if prescriptions:
-        prescriptions_list = [
-            {
-                "prescription_id": prescription[1],
-                "patient_name": prescription[2],
-                "medication": prescription[3],
-                "dispense_date": prescription[4],
-                "off_label_use": prescription[5]
-            }
-            for prescription in prescriptions
-        ]
-        return jsonify(prescriptions_list), 200
+        return jsonify(get_prescription_list(prescriptions)), 200
     else:
         return jsonify({"message": "No prescriptions found with off-label use."}), 404
 
