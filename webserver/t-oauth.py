@@ -7,8 +7,8 @@ CORS(app)
 
 # In-memory storage for client credentials and tokens
 clients = {
-    'client_id_1': 'client_secret_1',
-    'client_id_2': 'client_secret_2'
+    'client_erp_fd': 'client_secret_erp_fd',
+    'client_bfarm_webclient': 'client_secret_bfarm_webclient'
 }
 
 access_tokens = {}
@@ -53,13 +53,15 @@ def resource():
 
 @app.route('/introspect', methods=['POST', 'OPTIONS'])
 def introspect():
-    print(request)
+    print("Introspecting Token")
     token = request.form.get('token')
     if not token:
         return jsonify({'error': 'token_missing'}), 400
 
     # Check if the token is valid
     if token in access_tokens:
+        print("Token is valid")
+        print("Client: " + access_tokens[token])
         return jsonify({
             'active': True,
             'client_id': access_tokens[token]

@@ -4,8 +4,8 @@ let accessToken = '';  // Variable to store the access token
 // Function to obtain the access token
 function obtainAccessToken() {
     console.log("Attempting to obtain access token...");
-    const clientId = 'client_id_2';
-    const clientSecret = 'client_secret_2';
+    const clientId = 'client_bfarm_webclient';
+    const clientSecret = 'client_secret_bfarm_webclient';
 
     fetch('http://127.0.0.1:3001/token', {
         method: 'POST',
@@ -35,28 +35,22 @@ function obtainAccessToken() {
     });
 }
 
-
-
 document.getElementById('fetchByDate').addEventListener('click', fetchPrescriptionsByDate);
 document.getElementById('fetchOffLabel').addEventListener('click', fetchOffLabelPrescriptions);
 document.getElementById('fetchAll').addEventListener('click', fetchAllPrescriptions);
+document.getElementById('createDispense').addEventListener('click', createDispense); // New Event Listener
 
 // Fetch all prescriptions
 function fetchAllPrescriptions() {
     console.log('Fetching all prescriptions');
-    console.log(accessToken);
     fetch('http://127.0.0.1:3000/t-prescription-all', {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${accessToken}`  // Use the stored access token
         }
     })
-    .then(response =>{
-        console.log(response)
-        return response.json()
-    })
+    .then(response => response.json())
     .then(data => {
-        console.log(data)
         populateTable(data);
     })
     .catch(error => {
@@ -101,6 +95,36 @@ function fetchOffLabelPrescriptions() {
     })
     .catch(error => {
         console.error('Error fetching off-label prescriptions:', error);
+    });
+}
+
+// Create a new dispense
+function createDispense() {
+    console.log('Creating a new dispense');
+    fetch('http://127.0.0.1:3002/dispense', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,  // Use the stored access token
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            // Add any necessary data for the dispense creation here
+            // Example: prescription_id, patient_name, etc.
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to create dispense');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Dispense created:', data);
+        alert('Dispense created successfully!');
+    })
+    .catch(error => {
+        console.error('Error creating dispense:', error);
+        alert('Failed to create dispense. Please check the console for more details.');
     });
 }
 
