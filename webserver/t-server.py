@@ -72,7 +72,15 @@ def insert_prescription(prescription_id, patient_name, medication, dispense_date
     finally:
         conn.close()
 
-# Function to retrieve all prescriptions
+# Function to interact with database
+def delete_all_prescriptions():
+    conn = sqlite3.connect('./t-database.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('DELETE FROM prescriptions')
+    conn.commit()
+    conn.close()
+
 def get_all_prescriptions():
     conn = sqlite3.connect('./t-database.db')
     cursor = conn.cursor()
@@ -83,6 +91,25 @@ def get_all_prescriptions():
     
     return prescriptions
     
+def get_prescriptions_off_label_use():
+    conn = sqlite3.connect('./t-database.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT * FROM prescriptions WHERE off_label_use = 1')
+    prescriptions = cursor.fetchall()
+    conn.close()
+    
+    return prescriptions
+
+def get_prescription_by_date(date):
+    conn = sqlite3.connect('./t-database.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT * FROM prescriptions WHERE dispense_date = ?', (date,))
+    prescriptions = cursor.fetchall()
+    conn.close()
+    
+    return prescriptions
 
 # Endpoint to receive prescription data
 @app.route('/t-prescription-carbon-copy', methods=['POST', 'OPTIONS'])

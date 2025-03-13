@@ -132,17 +132,22 @@ function createDispense() {
 function populateTable(data) {
     prescriptionTableBody.innerHTML = '';  // Clear existing rows
     data.forEach(prescription => {
+        // Convert date from yyyy-mm-dd to dd.mm.yyyy
+        const [year, month, day] = prescription.dispense_date.split('-');
+        const formattedDate = `${day}.${month}.${year}`;
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${prescription.prescription_id}</td>
             <td>${prescription.patient_name}</td>
             <td>${prescription.medication}</td>
-            <td>${prescription.dispense_date}</td>
+            <td>${formattedDate}</td>
             <td>${prescription.off_label_use ? 'Yes' : 'No'}</td>
         `;
         prescriptionTableBody.appendChild(row);
     });
 }
+
 
 // Function to sort the table by column index
 function sortTable(columnIndex) {

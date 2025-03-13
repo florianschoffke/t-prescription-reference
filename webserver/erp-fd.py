@@ -45,11 +45,11 @@ def generate_random_prescription():
     ]
     medication = random.choice(medications)
     
-    # Dispense date in German format dd.mm.yyyy
+    # Dispense date
     year = 2025
     month = random.randint(1, 12)
     day = random.randint(1, 28 if month in [2] else 30 if month in [4, 6, 9, 11] else 31)
-    dispense_date = f"{day:02d}.{month:02d}.{year}"
+    dispense_date = f"{year}-{month:02d}-{day:02d}"
     
     # Off-label use
     off_label_use = random.choice(['true', 'false'])
