@@ -21,4 +21,4 @@ All of the information is simplified to only demonstrate the rough workflow.
 
 ## Arcitecture Overview
 
-![image](./arcitecture.png)
+![image](./architecture.png)
