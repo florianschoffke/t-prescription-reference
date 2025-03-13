@@ -7,10 +7,12 @@ import requests
 import logging
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}}, 
-     methods=["GET", "POST", "OPTIONS"],
-     allow_headers=["Authorization", "Content-Type"])
+CORS(app)
 
+@app.after_request
+def add_header(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 # In-memory storage to simulate token validation
 # This should be synchronized with the OAuth server's in-memory storage
@@ -68,12 +70,11 @@ def get_all_prescriptions():
 def check_token():
     print(request.headers)
     auth_header = request.headers.get('Authorization')
-    print(auth_header)
     if not auth_header:
         return jsonify({"error": "Authorization header missing"}), 401
 
     token = auth_header.split(" ")[1]  # Extract the token from the header
-    print("XXX")
+
     print(validate_token(token))
     if not validate_token(token):
         return jsonify({"error": "Invalid or expired token"}), 401
@@ -93,8 +94,9 @@ def receive_prescription():
         prescription_id, patient_name, medication, dispense_date, off_label_use = row
         off_label_use = True if off_label_use.lower() == 'true' else False
         insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use)
-    
+        
     return jsonify({"message": "Prescription data received and stored successfully."}), 201
+    
 
 # Endpoint to retrieve all prescriptions
 @app.route('/t-prescription-all', methods=['GET', 'OPTIONS'])

@@ -15,6 +15,11 @@ clients = {
 
 access_tokens = {}
 
+@app.after_request
+def add_header(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
 @app.route('/token', methods=['POST', 'OPTIONS'])
 def token():
     client_id = request.form.get('client_id')
@@ -32,9 +37,7 @@ def token():
     access_token = str(uuid.uuid4())
     access_tokens[access_token] = client_id
     
-    response = jsonify({'access_token': access_token, 'token_type': 'bearer'})
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+    return jsonify({'access_token': access_token, 'token_type': 'bearer'})
 
 @app.route('/resource', methods=['GET', 'OPTIONS'])
 def resource():
@@ -45,11 +48,8 @@ def resource():
     access_token = auth_header.split(' ')[1]
     if access_token not in access_tokens:
         return jsonify({'error': 'invalid_token'}), 401
-    
-    response = jsonify({'data': 'This is protected data.'})
-    response.headers.add('Access-Control-Allow-Origin', '*')
 
-    return response
+    return jsonify({'data': 'This is protected data.'})
 
 @app.route('/introspect', methods=['POST', 'OPTIONS'])
 def introspect():
@@ -60,16 +60,12 @@ def introspect():
 
     # Check if the token is valid
     if token in access_tokens:
-        response = jsonify({
+        return jsonify({
             'active': True,
             'client_id': access_tokens[token]
         }), 200
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
     else:
-        response = jsonify({'active': False}), 200
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
+        return jsonify({'active': False}), 200
 
 if __name__ == '__main__':
     app.run(port=3001, debug=True)

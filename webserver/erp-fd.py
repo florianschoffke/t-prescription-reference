@@ -6,7 +6,7 @@ import os
 
 app = Flask(__name__)
 
-
+# Set the NO_PROXY environment variable to prevent requests from going through the proxy if necessary
 os.environ['NO_PROXY'] = 'localhost,127.0.0.1'
 
 # Function to generate random prescription data
@@ -71,9 +71,13 @@ def dispense():
         )
         
         # Return the response from the other server
-        return jsonify({'status': response.status_code, 'message': response.json()}), response.status_code
+        response = jsonify({'status': response.status_code, 'message': response.json()}), response.status_code
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     except requests.exceptions.RequestException as e:
-        return jsonify({'error': str(e)}), 500
+        response = jsonify({'error': str(e)}), 500
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 if __name__ == '__main__':
     app.run(port=3002, debug=True)
