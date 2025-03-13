@@ -38,7 +38,8 @@ function obtainAccessToken() {
 document.getElementById('fetchByDate').addEventListener('click', fetchPrescriptionsByDate);
 document.getElementById('fetchOffLabel').addEventListener('click', fetchOffLabelPrescriptions);
 document.getElementById('fetchAll').addEventListener('click', fetchAllPrescriptions);
-document.getElementById('createDispense').addEventListener('click', createDispense); // New Event Listener
+document.getElementById('createDispense').addEventListener('click', createDispense);
+document.getElementById('deleteAll').addEventListener('click', deleteAllPrescriptions);
 
 // Fetch all prescriptions
 function fetchAllPrescriptions() {
@@ -125,6 +126,28 @@ function createDispense() {
     .catch(error => {
         console.error('Error creating dispense:', error);
         alert('Failed to create dispense. Please check the console for more details.');
+    });
+}
+
+// Delete all prescriptions
+function deleteAllPrescriptions() {
+    console.log('Deleting all prescriptions');
+    fetch('http://127.0.0.1:3000/delete-prescriptions', {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${accessToken}`  // Use the stored access token
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete prescriptions');
+        }
+        alert('All prescriptions deleted successfully!');
+        prescriptionTableBody.innerHTML = '';  // Clear the table
+    })
+    .catch(error => {
+        console.error('Error deleting prescriptions:', error);
+        alert('Failed to delete prescriptions. Please check the console for more details.');
     });
 }
 
