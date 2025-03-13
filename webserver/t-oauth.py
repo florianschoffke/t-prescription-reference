@@ -3,7 +3,7 @@ import uuid
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}}, 
+CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}}, 
      methods=["GET", "POST", "OPTIONS"],
      allow_headers=["Authorization", "Content-Type"])
 
@@ -31,8 +31,10 @@ def token():
     # Issue an access token
     access_token = str(uuid.uuid4())
     access_tokens[access_token] = client_id
-
-    return jsonify({'access_token': access_token, 'token_type': 'bearer'})
+    
+    response = jsonify({'access_token': access_token, 'token_type': 'bearer'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/resource', methods=['GET', 'OPTIONS'])
 def resource():
@@ -43,8 +45,11 @@ def resource():
     access_token = auth_header.split(' ')[1]
     if access_token not in access_tokens:
         return jsonify({'error': 'invalid_token'}), 401
+    
+    response = jsonify({'data': 'This is protected data.'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
 
-    return jsonify({'data': 'This is protected data.'})
+    return response
 
 @app.route('/introspect', methods=['POST', 'OPTIONS'])
 def introspect():
@@ -55,12 +60,16 @@ def introspect():
 
     # Check if the token is valid
     if token in access_tokens:
-        return jsonify({
+        response = jsonify({
             'active': True,
             'client_id': access_tokens[token]
         }), 200
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     else:
-        return jsonify({'active': False}), 200
+        response = jsonify({'active': False}), 200
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 if __name__ == '__main__':
     app.run(port=3001, debug=True)

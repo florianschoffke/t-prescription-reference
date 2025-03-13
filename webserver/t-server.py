@@ -7,8 +7,8 @@ import requests
 import logging
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:8000"}}, 
-     methods=["GET", "POST", "OPTIONS", 'OPTIONS'],
+CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}}, 
+     methods=["GET", "POST", "OPTIONS"],
      allow_headers=["Authorization", "Content-Type"])
 
 
