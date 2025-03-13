@@ -48,7 +48,7 @@ function fetchAllPrescriptions() {
     fetch('http://127.0.0.1:3000/t-prescription-all', {
         method: 'GET',
         headers: {
-            Authorization: `Bearer ${accessToken}`  // Use the stored access token
+            'Authorization': `Bearer ${accessToken}`  // Use the stored access token
         }
     })
     .then(response =>{

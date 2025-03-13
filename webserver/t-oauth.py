@@ -3,9 +3,7 @@ import uuid
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}}, 
-     methods=["GET", "POST", "OPTIONS"],
-     allow_headers=["Authorization", "Content-Type"])
+CORS(app)
 
 # In-memory storage for client credentials and tokens
 clients = {
@@ -17,7 +15,9 @@ access_tokens = {}
 
 @app.after_request
 def add_header(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
 @app.route('/token', methods=['POST', 'OPTIONS'])

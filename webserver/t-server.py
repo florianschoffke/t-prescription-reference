@@ -9,9 +9,25 @@ import logging
 app = Flask(__name__)
 CORS(app)
 
+# Middleware to check token validity
+@app.before_request
+def check_token():
+    if request.method != 'OPTIONS':
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({"error": "Authorization header missing"}), 403
+
+        token = auth_header.split(" ")[1]  # Extract the token from the header
+
+        print(validate_token(token))
+        if not validate_token(token):
+            return jsonify({"error": "Invalid or expired token"}), 401
+
 @app.after_request
 def add_header(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
     return response
 
 # In-memory storage to simulate token validation
@@ -22,9 +38,11 @@ access_tokens = {
 
 # Function to validate the access token
 def validate_token(token):
+    print("Validating Token")
     introspection_url = "http://localhost:3001/introspect"
     response = requests.post(introspection_url, data={'token': token})
     token_info = response.json()
+    print(token_info)
     return token_info.get('active', False)
 
 
@@ -64,21 +82,6 @@ def get_all_prescriptions():
     conn.close()
     
     return prescriptions
-
-# Middleware to check token validity
-@app.before_request
-def check_token():
-    print(request.headers)
-    auth_header = request.headers.get('Authorization')
-    if not auth_header:
-        return jsonify({"error": "Authorization header missing"}), 401
-
-    token = auth_header.split(" ")[1]  # Extract the token from the header
-
-    print(validate_token(token))
-    if not validate_token(token):
-        return jsonify({"error": "Invalid or expired token"}), 401
-    
     
 
 # Endpoint to receive prescription data
