@@ -3,10 +3,10 @@
 This repository should demonstrate the basic functionality of a webservice that can be used to receive prescription data which then is retrieved by a web client.
 
 Each file represents an entity of the system:
-* [Webserver with Endpoints](./webserver/t-server.py)
-* [Webserver with Endpoints](./webserver/t-server.py)
+* [E-Rezept Fachdienst](./webserver/erp-fd.py)
+* [T-Rezept Server with Endpoints](./webserver/t-server.py)
 * [Database Service](./webserver/t_database.py)
-* [OAuth Service for Web ](./webserver/t-oatuh.py)
+* [OAuth Service for Web Authentication](./webserver/t-oatuh.py)
 
 All of the information is simplified to only demonstrate the rough workflow.
 
@@ -18,3 +18,7 @@ All of the information is simplified to only demonstrate the rough workflow.
 2. Start all services by calling `./start_services.sh`
 3. Open in Browser: `http://localhost:8000/`
 4. Stop all services by calling `./stop_services.sh`
+
+## Arcitecture Overview
+
+![image](./arcitecture.png)
