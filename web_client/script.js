@@ -50,14 +50,29 @@ function fetchAllPrescriptions() {
             'Authorization': `Bearer ${accessToken}`  // Use the stored access token
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response:', response);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
-        populateTable(data);
+        if (data) {
+            if (data.message) {
+                message = data.message;
+                alert(message);
+            } else {
+                populateTable(data);
+            }
+        }
     })
     .catch(error => {
         console.error('Error fetching all prescriptions:', error);
+        alert('An error occurred while fetching prescriptions. Please check the console for more details.');
     });
 }
+
 
 // Fetch prescriptions by dispense date
 function fetchPrescriptionsByDate() {
@@ -166,6 +181,8 @@ function populateTable(data) {
             <td>${prescription.medication}</td>
             <td>${formattedDate}</td>
             <td>${prescription.off_label_use ? 'Yes' : 'No'}</td>
+            <td>${prescription.pharmacy}</td>
+            <td>${prescription.doctor}</td>
         `;
         prescriptionTableBody.appendChild(row);
     });

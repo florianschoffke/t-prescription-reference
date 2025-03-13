@@ -6,8 +6,8 @@ body {
 }
 
 .container {
-  max-width: 800px;
-  margin: 20px auto;
+  max-width: 90%; /* Use a percentage to allow flexibility */
+  margin: 20px auto; /* Reduce the margin to make better use of space */
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;

@@ -7,32 +7,36 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Prescription Data</h1>
-    
-    <div>
-        <label for="dispenseDate">Select Dispense Date:</label>
-        <input type="date" id="dispenseDate">
-        <button id="fetchByDate">Fetch Prescriptions</button>
-        <button id="fetchOffLabel">Fetch Off-Label Use Prescriptions</button>
-        <button id="fetchAll">Fetch All Prescriptions</button>
-        <button id="createDispense">Create Dispense</button> 
-        <button class="btn" id="deleteAll">Delete All Prescriptions</button> 
+    <div class="container"> <!-- Ensure this class is applied -->
+        <h1>Prescription Data</h1>
+        
+        <div class="controls">
+            <label for="dispenseDate">Select Dispense Date:</label>
+            <input type="date" id="dispenseDate" class="date-input">
+            <button class="btn" id="fetchByDate">Fetch Prescriptions</button>
+            <button class="btn" id="fetchOffLabel">Fetch Off-Label Use Prescriptions</button>
+            <button class="btn" id="fetchAll">Fetch All Prescriptions</button>
+            <button class="btn" id="createDispense">Create Dispense</button>
+            <button class="btn" id="deleteAll">Delete All Prescriptions</button>
+        </div>
+        
+        <table id="prescriptionTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Prescription ID</th>
+                    <th onclick="sortTable(1)">Patient Name</th>
+                    <th onclick="sortTable(2)">Medication</th>
+                    <th onclick="sortTable(3)">Dispense Date</th>
+                    <th onclick="sortTable(4)">Off Label Use</th>
+                    <th onclick="sortTable(5)">Pharmacy</th>
+                    <th onclick="sortTable(6)">Doctor</th>
+                </tr>
+            </thead>
+            <tbody id="prescriptionBody">
+                <!-- Prescription data will be populated here -->
+            </tbody>
+        </table>
     </div>
-    
-    <table id="prescriptionTable">
-        <thead>
-            <tr>
-                <th onclick="sortTable(0)">Prescription ID</th>
-                <th onclick="sortTable(1)">Patient Name</th>
-                <th onclick="sortTable(2)">Medication</th>
-                <th onclick="sortTable(3)">Dispense Date</th>
-                <th onclick="sortTable(4)">Off Label Use</th>
-            </tr>
-        </thead>
-        <tbody id="prescriptionBody">
-            <!-- Prescription data will be populated here -->
-        </tbody>
-    </table>
 
     <script src="script.js"></script>
 </body>

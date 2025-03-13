@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import t_database
 import sqlite3
 import csv
 import io
@@ -50,80 +51,23 @@ def validate_token(token):
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Function to insert prescription data into the SQLite database
-def insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use):
-    try:
-        conn = sqlite3.connect('./t-database.db')  # Updated database path
-        cursor = conn.cursor()
-        
-        # Log the data being inserted
-        logger.info(f"Inserting prescription: ID={prescription_id}, Patient={patient_name}, Medication={medication}, Date={dispense_date}, OffLabelUse={off_label_use}")
-        
-        # Insert the prescription data into the database
-        cursor.execute('''
-            INSERT INTO prescriptions (prescription_id, patient_name, medication, dispense_date, off_label_use)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (prescription_id, patient_name, medication, dispense_date, off_label_use))
-        
-        conn.commit()
-        logger.info("Prescription data inserted successfully.")
-    except sqlite3.Error as e:
-        logger.error(f"Error inserting prescription data: {e}")
-    finally:
-        conn.close()
 
 # Function to interact with database
-def delete_all_prescriptions():
-    conn = sqlite3.connect('./t-database.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('DELETE FROM prescriptions')
-    conn.commit()
-    conn.close()
 
-def get_all_prescriptions():
-    conn = sqlite3.connect('./t-database.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM prescriptions')
-    prescriptions = cursor.fetchall()
-    conn.close()
-    
-    return prescriptions
-    
-def get_prescriptions_off_label_use():
-    conn = sqlite3.connect('./t-database.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM prescriptions WHERE off_label_use = 1')
-    prescriptions = cursor.fetchall()
-    conn.close()
-    
-    return prescriptions
-
-def get_prescription_by_date(date):
-    conn = sqlite3.connect('./t-database.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM prescriptions WHERE dispense_date = ?', (date,))
-    prescriptions = cursor.fetchall()
-    conn.close()
-    
-    return prescriptions
 
 # Endpoint to receive prescription data
 @app.route('/t-prescription-carbon-copy', methods=['POST', 'OPTIONS'])
 def receive_prescription():
-    print("Hello World")
     csv_line = request.data.decode('utf-8')
     csv_reader = csv.reader(io.StringIO(csv_line))
     for row in csv_reader:
-        if len(row) != 5:
+        if len(row) != 7:
             return jsonify({"error": "Invalid CSV format. Expected 5 columns."}), 400
         
-        prescription_id, patient_name, medication, dispense_date, off_label_use = row
+        prescription_id, patient_name, medication, dispense_date, off_label_use, pharmacy, doctor = row
         off_label_use = True if off_label_use.lower() == 'true' else False
-        insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use)
+        
+        t_database.insert_prescription(prescription_id, patient_name, medication, dispense_date, off_label_use, pharmacy, doctor)
         
     return jsonify({"message": "Prescription data received and stored successfully."}), 201
     
@@ -131,7 +75,9 @@ def receive_prescription():
 # Endpoint to retrieve all prescriptions
 @app.route('/t-prescription-all', methods=['GET', 'OPTIONS'])
 def get_all_prescriptions_route():
-    prescriptions = get_all_prescriptions()
+    prescriptions = t_database.get_all_prescriptions()
+    
+    print(prescriptions)
     
     if prescriptions:
         prescriptions_list = [
@@ -140,13 +86,17 @@ def get_all_prescriptions_route():
                 "patient_name": prescription[2],
                 "medication": prescription[3],
                 "dispense_date": prescription[4],
-                "off_label_use": prescription[5]
+                "off_label_use": prescription[5],
+                "pharmacy": prescription[6],
+                "doctor": prescription[7]
             }
             for prescription in prescriptions
         ]
         return jsonify(prescriptions_list), 200
+    elif len(prescriptions) == 0:
+        return jsonify({"message": "No prescriptions found"}), 200
     else:
-        return jsonify({"message": "No prescriptions found."}), 404
+        return jsonify({"message": "Error"}), 500
 
 # Endpoint to retrieve prescriptions by dispense date
 @app.route('/t-prescription-by-date', methods=['GET', 'OPTIONS'])
@@ -155,7 +105,7 @@ def get_prescription_by_date_route():
     if not dispense_date:
         return jsonify({"error": "dispense_date query parameter is required."}), 400
     
-    prescriptions = get_prescription_by_date(dispense_date)
+    prescriptions = t_database.get_prescription_by_date(dispense_date)
     
     if prescriptions:
         prescriptions_list = [
@@ -175,7 +125,7 @@ def get_prescription_by_date_route():
 # Endpoint to retrieve all prescriptions with off-label use
 @app.route('/t-prescription-off-label-use', methods=['GET', 'OPTIONS'])
 def get_prescription_off_label_use_route():
-    prescriptions = get_prescriptions_off_label_use()
+    prescriptions = t_database.get_prescriptions_off_label_use()
     
     if prescriptions:
         prescriptions_list = [
@@ -191,6 +141,15 @@ def get_prescription_off_label_use_route():
         return jsonify(prescriptions_list), 200
     else:
         return jsonify({"message": "No prescriptions found with off-label use."}), 404
+
+
+@app.route('/delete-prescriptions', methods=['DELETE'])
+def delete_prescriptions_endpoint():
+    try:
+        t_database.delete_all_prescriptions()
+        return jsonify({"message": "All prescriptions deleted successfully."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(port=3000, debug=True)

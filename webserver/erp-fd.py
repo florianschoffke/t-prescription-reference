@@ -20,6 +20,9 @@ def add_header(response):
 
 
 # Function to generate random prescription data
+import random
+import string
+
 def generate_random_prescription():
     # Prescription ID format: [166|206].xxx.xxx.xxx.xx
     prefix = random.choice(['166', '206'])
@@ -54,7 +57,24 @@ def generate_random_prescription():
     # Off-label use
     off_label_use = random.choice(['true', 'false'])
     
-    return prescription_id, patient_name, medication, dispense_date, off_label_use
+    # Expanded list of pharmacy names
+    pharmacies = [
+        "HealthMart Pharmacy", "CVS Pharmacy", "Walgreens", "Rite Aid", "Kroger Pharmacy",
+        "Walmart Pharmacy", "Medicine Shoppe", "Good Neighbor Pharmacy", "Safeway Pharmacy",
+        "Albertsons Pharmacy"
+    ]
+    pharmacy = random.choice(pharmacies)
+    
+    # Expanded list of doctor names
+    doctor_first_names = ["Dr. John", "Dr. Emily", "Dr. Michael", "Dr. Sarah", "Dr. David"]
+    doctor_last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones"]
+    doctor = f"{random.choice(doctor_first_names)} {random.choice(doctor_last_names)}"
+    
+    return prescription_id, patient_name, medication, dispense_date, off_label_use, pharmacy, doctor
+
+# Example usage
+print(generate_random_prescription())
+
 
 
 # Function to retrieve a bearer token
@@ -92,10 +112,10 @@ def dispense():
         return jsonify({'error': 'Failed to retrieve bearer token'}), 500
 
     # Generate random prescription data
-    prescription_id, patient_name, medication, dispense_date, off_label_use = generate_random_prescription()
+    prescription_id, patient_name, medication, dispense_date, off_label_use, pharmacy, doctor = generate_random_prescription()
     
     # Create a CSV line with the random data
-    csv_line = f"{prescription_id},{patient_name},{medication},{dispense_date},{off_label_use}"
+    csv_line = f"{prescription_id},{patient_name},{medication},{dispense_date},{off_label_use}, {pharmacy}, {doctor}"
     
     # Call the /t-prescription-carbon-copy endpoint on the other server
     print("Connect to T-Server")
